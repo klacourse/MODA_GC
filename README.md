@@ -50,7 +50,7 @@ Main outputs generated :
 The package has been developed on Linux 16.04 with MATLAB R2018b 
 (no toolbox is needed unless you want to run in parallel).
 
-### What will I find in this code package?
+## What will I find in this code package?
 
 This package is composed of 2 main scripts : 
     "MODA01_genAvgScoreAndGC.m" and "MODA02_genEEGVectBlock.m";
@@ -70,6 +70,7 @@ an input, output and a library folder.
 	7. 7_segListSrcDataLoc_p2.txt : The 345 extracted 115 s blocks from the 80 edf files for the phase 2.
 		7_segListSrcDataLoc_p2_90.txt : 314 extracted 115 s blocks from 72 edf files for the phase 2 (training/validation).
 		7_segListSrcDataLoc_p2_10.txt : 31 extracted 115 s blocks from 8 edf files for the phase 2 (testing).
+  
   -> For more information read the #README.txt in the input folder.
 
 * Output folder "output" includes the MODA GC for the training/validation dataset
@@ -85,6 +86,7 @@ an input, output and a library folder.
 	4. !!! EEGVect_px.mat may soon be available, for now it has to be generated from the EDF/XML files !!! : 
         the EEG time series vector (ex. EEGVect_p1.mat) of the extracted 
         115 s blocks concatenated in one tall vector.
+  
   -> For more information read the #README.txt in the output folder.
 						
 
@@ -93,7 +95,7 @@ an input, output and a library folder.
 
 
 
-### How do I get set up?
+## How do I get set up?
 
 * Open "MODA01_GC_DEF.m" and modify the settings available to match your configuration.  
 	Some variables (as the Group Consensus Threshold and the spindle length limit) 
@@ -109,7 +111,7 @@ You can also use the outputs files already saved in the output folder.
 
 
 
-### Interpreting the Results
+## Interpreting the Results
 
 The GC spindle events list is found in ./output/GC_spindlesLst_user_px.txt, 
 where each row is a spindle event. Note that the spindle events are based 
