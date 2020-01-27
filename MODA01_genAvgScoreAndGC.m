@@ -1,5 +1,6 @@
 % Script to generate the average score vector and the Group
-% Consensus vector each user subtype "experts (exp), researchers (re), Non-experts (ne)" 
+% Consensus vector for each user subtype :
+%   "experts (exp), researchers (re), Non-experts (ne)" 
 % and each phase (phase 1 and phase 2) of MODA.
 %
 % Generates the score averaged across annotators as a "scoreAvg_usr_px.mat"
@@ -12,22 +13,30 @@
 %   - The Group Concensus threshold is applied
 %   - The spindle length rules are applied.
 %
-% Writes the list of GC spindles into a text file "GC_spindlesLst_user_px.txt".
+% Writes the list of GC spindles into 2 text files:
+%   "GC_spindlesLst_4EEGVect_user_px.txt" : events referenced to the tall eeg vector
+%   "GC_spindlesLst_4PSG_user_px.txt" : events referenced to the subject PSG file
 %
 % A folder is also created with the score vector of each annotator.
 % The score is NaN when the annotator has not seen the epoch.
 %
 % There is a NaN between each block of 115 s (FS=100 Hz) in all the .mat vectors
-% created.
+% created.  
+% 
+% Warning : The subject "01-02-0013" has only 2 blocks instead of 3, the
+% missing block is marked NaN in the GC vector.  The missing block (#2) has been
+% removed from the 6_segListSrcDataLoc_p1.txt file (row #393).
 %
 % Inputs:
+%   - 6_segListSrcDataLoc_p1.txt
+%   - 7_segListSrcDataLoc_p2.txt
 %   For experts and researchers
-%   - 1_EpochViews_exp_re_90.txt
-%   - 3_EventLocations_exp_re_90.txt
-%   - 5_userSubtypeAnonymLUT_exp_re_20190521
+%   - 1_EpochViews_exp_re.txt
+%   - 3_EventLocations_exp_re.txt
+%   - 5_userSubtypeAnonymLUT_exp_re.txt
 %   For non-experts
-%   - 2_EpochViews_ne_90.txt
-%   - 4_EventLocations_ne_90.txt
+%   - 2_EpochViews_ne.txt
+%   - 4_EventLocations_ne.txt
 %
 % Outputs (all possibilities):
 %   *** If 'exp' is chosen
@@ -53,12 +62,16 @@
 
 % INIT
 NEPOCHS_PHASE1 = 2025; % Number of epochs in the phase 1
+% The real number of epochs seen is 2020 (because one block has not been
+% presented to the scorers) but the index number 2025 is important to keep 
+% track of the data extracted.
 NEPOCHS_PHASE2 = 1725; % Number of epochs in the phase 2
 NSAMPLESINEPOCH = 2501; % Number of samples in one epoch including overlap
 NSAMPLESINBLOCK = 11501; % Number of samples in one block without overlap
 NSECOVERLAP = 2.5; % Duration of the overlap between epochs (in sec)
 NEPOCHSINBLOCK = 5; % Number of epochs in one block
-FS = 100; % Frequency sampling rate (Hz)
+FS = 100; % Frequency sampling rate (Hz) of the data processed
+PSG_FS = 256; % Frequency sampling rate (Hz) of the EEG signal in the PSG
 % Score for [high, med, low]
 SCORECONFIDENCEVAL = [1, 0.75, 0.5]; % score to convert label to number
 
@@ -72,32 +85,41 @@ SCORECONFIDENCEVAL = [1, 0.75, 0.5]; % score to convert label to number
 % nTotSamples (segs) p1 : 4,657,905
 % nTotSamples (segs) p2 : 3,967,845
 
+% Header of the source eeg data
+% Header : epochNum	subjectID	blockNumSrc	blockNumExp	epochStartSample
+epochNumCol         = 1;
+subjectIDCol        = 2;
+epochStartSampleCol = 5;
+
 %-----------------------------------------------------------------------
 %% Start of the Package Analysis: Create the structure needed to save all the analysis
 %-----------------------------------------------------------------------
 % Experts
 if strcmp(userSubtype,'exp')
     GCTHRESH = GCTHRESH_EXP; % Group Consensus threshold
-    inputPathPackageDir{1} = [genInputPackage,'3_EventLocations_exp_re_90.txt'];
-    inputPathPackageDir{2} = [genInputPackage,'1_EpochViews_exp_re_90.txt'];
-    inputPathPackageDir{3} = [genInputPackage,'5_userSubtypeAnonymLUT_exp_re_20190521.txt'];
+    inputPathPackageDir{1} = [genInputPackage,'3_EventLocations_exp_re.txt'];
+    inputPathPackageDir{2} = [genInputPackage,'1_EpochViews_exp_re.txt'];
+    inputPathPackageDir{3} = [genInputPackage,'5_userSubtypeAnonymLUT_exp_re.txt'];
     NPHASES = 2;
 % Researchers
 elseif strcmp(userSubtype,'re')
     GCTHRESH = GCTHRESH_RE; % Group Consensus threshold
-    inputPathPackageDir{1} = [genInputPackage,'3_EventLocations_exp_re_90.txt'];
-    inputPathPackageDir{2} = [genInputPackage,'1_EpochViews_exp_re_90.txt'];
-    inputPathPackageDir{3} = [genInputPackage,'5_userSubtypeAnonymLUT_exp_re_20190521.txt'];
+    inputPathPackageDir{1} = [genInputPackage,'3_EventLocations_exp_re.txt'];
+    inputPathPackageDir{2} = [genInputPackage,'1_EpochViews_exp_re.txt'];
+    inputPathPackageDir{3} = [genInputPackage,'5_userSubtypeAnonymLUT_exp_re.txt'];
     NPHASES = 1;
 % Non-Experts
 elseif strcmp(userSubtype,'ne')
     GCTHRESH = GCTHRESH_NE; % Group Consensus threshold
-    inputPathPackageDir{1} = [genInputPackage,'4_EventLocations_ne_90.txt'];
-    inputPathPackageDir{2} = [genInputPackage,'2_EpochViews_ne_90.txt'];
+    inputPathPackageDir{1} = [genInputPackage,'4_EventLocations_ne.txt'];
+    inputPathPackageDir{2} = [genInputPackage,'2_EpochViews_ne.txt'];
     NPHASES = 1;
 else
     error('Unexpected userSubtype');
 end
+% list of the block extracted from the PSG files
+inputPathPackageDir{4} = [genInputPackage, '6_segListSrcDataLoc_p1.txt'];
+inputPathPackageDir{5} = [genInputPackage, '7_segListSrcDataLoc_p2.txt'];
 
 % The name of the current script
 curScriptStruct     = dbstack();
@@ -112,11 +134,11 @@ DEF = createStructFolder4MODA( genPathPackage, packageName, userSubtype);
 pathOutput = DEF.pathOutput;
 
 %-----------------------------------------------------------------------
-%% Core of the script
+% Core of the script
 %-----------------------------------------------------------------------
 
 %------------------------------------------------------------
-% Select the appropriate annotators based on the userSubtype
+%% Select the appropriate annotators based on the userSubtype
 %------------------------------------------------------------
     if ~strcmp(userSubtype,'ne')
         usersIDSel = select_userID_fromSubtype(inputPathPackageDir{3}, userSubtype);
@@ -127,7 +149,7 @@ pathOutput = DEF.pathOutput;
     end
 
 %------------------------------------------------------------
-% Mark the epochs viewed by each annotator
+%% Mark the epochs viewed by each annotator
 % -> No score at all, only zeros when the epoch is viewed
 %------------------------------------------------------------
     fprintf('... Marking the epochs viewed by each annotator\n');
@@ -148,7 +170,7 @@ pathOutput = DEF.pathOutput;
     end
 
 %------------------------------------------------------------
-% Mark the spindles scored by each annotator
+%% Mark the spindles scored by each annotator
 %   with 2.5 s overlap between consecutive epochs
 %------------------------------------------------------------
     fprintf('... Marking the spindles scored by each annotator\n');
@@ -169,7 +191,7 @@ pathOutput = DEF.pathOutput;
     end    
 
 %------------------------------------------------------------
-% Convert the scores per epoch (including the 2.5 s overlap 
+%% Convert the scores per epoch (including the 2.5 s overlap 
 % between consecutive epochs) into scores per block of 115 s
 % without overlap.
 %
@@ -192,7 +214,7 @@ pathOutput = DEF.pathOutput;
     end
     
 %-----------------------------------------------
-% Average the scores across annotators
+%% Average the scores across annotators
 %-----------------------------------------------    
     fprintf('... Averaging the scores across annotatorss\n');
     annotScoreFolderName = ['p1_', userSubtype,'/'];
@@ -213,7 +235,7 @@ pathOutput = DEF.pathOutput;
 
     
 %-----------------------------------------------
-% Apply the GC threshold and manage the spindle length
+%% Apply the GC threshold and manage the spindle length
 %-----------------------------------------------        
     fprintf('... Applying the GC threshold and managing the spindle length\n');
     for iPhase = 1 : NPHASES
@@ -240,18 +262,19 @@ pathOutput = DEF.pathOutput;
                     mergeAndCutEvents( curSeg, FS, SPINDLELENGTH.max,...
                     SPINDLELENGTH.min, SPINDLELENGTH.merge );
             end
-        end
+        end     
 
         % Save the GC vector (.mat file)
         save([pathOutput,'GCVect_',userSubtype, '_p', num2str(iPhase),'.mat'],'GCVect');
     end
     
-
 %-----------------------------------------------
-% Write the list of spindles from the GC into a text file
+%% Write the list of spindles from the GC into a text file referenced to the
+% tall EEG vector
 %-----------------------------------------------            
 fprintf('... Writing the list of spindles from the GC into a text file\n');
-    rowHeader = {'eventNum', 'startSamples', 'durationSamples', 'startSec', 'durationSec'};
+fprintf('... Writing the list for the wide EEG Vector\n');
+    rowHeader = {'eventNum', 'startSamples', 'durationSamples','startSec', 'durationSec'};
     for iPhase = 1 : NPHASES
         tmp = load([pathOutput,'GCVect_',userSubtype, '_p', num2str(iPhase),'.mat']);
         GCVect = tmp.(char(fieldnames(tmp)));
@@ -259,7 +282,7 @@ fprintf('... Writing the list of spindles from the GC into a text file\n');
         GCVectNoNaN(isnan(GCVectNoNaN))=0;
         [ssStarts, ssEnds, ssDur] = event_StartsEndsDurations(GCVectNoNaN); 
         % Write the header
-        cell2tab([pathOutput,'GC_spindlesLst_',userSubtype, '_p', ...
+        cell2tab([pathOutput,'GC_spindlesLst_4EEGVect_',userSubtype, '_p', ...
             num2str(iPhase),'.txt'], rowHeader, 'w');
         % Write the spindles list
         eventNum = num2cell(1:length(ssStarts));
@@ -268,13 +291,105 @@ fprintf('... Writing the list of spindles from the GC into a text file\n');
         durationSamples = num2cell(ssDur);
         startSec = num2cell(round(ssStarts/FS,2));
         durationSec = num2cell(round(ssDur/FS,2));
-        cell2Write = [eventNum, startSamples, durationSamples, startSec, durationSec];
-        cell2tab([pathOutput,'GC_spindlesLst_',userSubtype, '_p', ...
-            num2str(iPhase),'.txt'], cell2Write, 'a');
+        % Events referenced to the wide EEG Vector
+        cell2WriteEEGVect = [eventNum, startSamples, durationSamples, startSec, durationSec];
+        cell2tab([pathOutput,'GC_spindlesLst_4EEGVect_',userSubtype, '_p', ...
+            num2str(iPhase),'.txt'], cell2WriteEEGVect, 'a');
     end
-
-
-    
+   
+%-----------------------------------------------
+%% Write the list of spindles from the GC into a text file referenced to the
+% PSG of each subject
+%-----------------------------------------------            
+fprintf('... Writing the list of events from the GC into text files\n');
+    for iPhase = 1 : NPHASES
+        tmp = load([pathOutput,'GCVect_',userSubtype, '_p', num2str(iPhase),'.mat']);
+        GCVect = tmp.(char(fieldnames(tmp)));
+        GCVectNoNaN = GCVect;
+        GCVectNoNaN(isnan(GCVectNoNaN))=0;
+        [ssStarts, ssEnds, ssDur] = event_StartsEndsDurations(GCVectNoNaN); 
+        % Compute the epoch Num (based on the 115 s block) of the tall EEG vector
+        iBlock = floor(ssStarts./NSAMPLESINBLOCK)+1;
+        iStartBlock = (iBlock-1)*NSAMPLESINBLOCK+1;
+        iOffsetStart = ssStarts-iStartBlock;
+        iEpoch = (iBlock-1)*NEPOCHSINBLOCK+1;
+        if iPhase==2
+            iEpoch = iEpoch + NEPOCHS_PHASE1;
+        end
+        % Read the epochListSrcDataLoc
+        dataSrcEEG              = readtext(inputPathPackageDir{3+iPhase},'[,\t]');
+        epochNumData            = cell2mat(dataSrcEEG(2:end,epochNumCol));
+        % look for the right block based on the epoch num
+        blockEvtLst = zeros(length(iEpoch),1);
+        epochLstUnique = unique(iEpoch);
+        for iFindEpoch = 1 : length(epochLstUnique)
+            tmp = find(epochNumData==epochLstUnique(iFindEpoch),1,'first');
+            if ~isempty(tmp)
+                blockEvtLst(iEpoch==epochLstUnique(iFindEpoch)) = tmp;
+            else
+                warning('The epoch %i is not found in the eeg source file',...
+                    iEpoch(iFindEpoch));
+            end
+        end
+        subjectIDData           = dataSrcEEG(blockEvtLst+1,subjectIDCol);
+        epochStartSampleData    = cell2mat(dataSrcEEG(blockEvtLst+1,epochStartSampleCol));
+        eventStartSmpPSG        = epochStartSampleData+iOffsetStart;
+        
+        %*************************
+        % Manage the GS spindles
+        %*************************      
+        rowHeader = {'epochNum','EEGVectBlockNum', 'PSGFilename', 'startSamples',...
+        'durationSamples','startSec', 'durationSec'};
+        % Convert the sample (FS=100 Hz) into second
+        startSec = round(eventStartSmpPSG/FS,2);
+        % Convert start in second into sample (FS=PSG_FS=256 Hz)
+        startSamples = round(startSec .* PSG_FS);
+        % Write the header
+        cell2tab([pathOutput,'GC_spindlesLst_4PSG_',userSubtype, '_p', ...
+            num2str(iPhase),'.txt'], rowHeader, 'w');
+        % Write the spindles list
+        eventNum = num2cell(1:length(ssStarts));
+        eventNum = eventNum';        
+        blockEvtLst = num2cell(blockEvtLst);
+        startSamples = num2cell(startSamples);
+        durationSamples = num2cell(round(ssDur ./ FS .* PSG_FS));
+        startSec = num2cell(startSec);
+        durationSec = num2cell(ssDur ./ FS);
+        % Events referenced to the subject PSG file
+        cell2WritePSG = [eventNum, blockEvtLst, subjectIDData, startSamples, ...
+            durationSamples, startSec, durationSec];
+        cell2tab([pathOutput,'GC_spindlesLst_4PSG_',userSubtype, '_p', ...
+            num2str(iPhase),'.txt'], cell2WritePSG, 'a');
+        
+        %*************************
+        % Manage the epochs viewed
+        %*************************        
+        rowHeader = {'EEGVectBlockNum', 'PSGFilename', 'startSamples',...
+            'durationSamples','startSec', 'durationSec'};     
+        subjectIDData = dataSrcEEG(2:end,subjectIDCol);
+        % The first sample is 1 (Matlab)
+        epochStartSmpPSG = cell2mat(dataSrcEEG(2:end, epochStartSampleCol))-1;
+        % Convert the sample (FS=100 Hz) into second
+        startSec = round(epochStartSmpPSG/FS,2);
+        % Convert start in second into sample (FS=PSG_FS=256 Hz)
+        startSamples = round(startSec .* PSG_FS)+1;
+        % Write the header
+        cell2tab([pathOutput,'GC_blockViewedLst_4PSG_',userSubtype, '_p', ...
+            num2str(iPhase),'.txt'], rowHeader, 'w');
+        % Write the blocks viewed list
+        startSamples = num2cell(startSamples);
+        durationSamples = repmat(NSAMPLESINBLOCK-1,length(startSamples),1) ./ FS .* PSG_FS;
+        startSec = num2cell(startSec);
+        durationSec = num2cell(durationSamples ./ PSG_FS);
+        durationSamples = num2cell(durationSamples);
+        % Events referenced to the subject PSG file
+        blockNum = 1 : length(startSamples);
+        blockNum = num2cell(blockNum');
+        cell2WritePSG = [blockNum, subjectIDData, startSamples, ...
+            durationSamples, startSec, durationSec];
+        cell2tab([pathOutput,'GC_blockViewedLst_4PSG_',userSubtype, '_p', ...
+            num2str(iPhase),'.txt'], cell2WritePSG, 'a');        
+    end
     
 %--------------------------------------------------------------------------
 %% END of Package analysis 

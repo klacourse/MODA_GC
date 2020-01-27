@@ -1,6 +1,6 @@
 ﻿# README
 
-* Release Version 1.0
+* Release Version 2.0
 
 
 # What is this code for?
@@ -29,12 +29,9 @@ and if they exceed the chosen Group Consensus Threshold (GCt) then
 these samples were identified to be part of the GC spindle dataset.
 
 ### Data available to download
-Following machine learning best practices, we have withheld 10% of the MODA Groups Consensus (GC)
- to use at an out-of-sample test set for future algorithms. 
-We suggest that developers should train, validate and test their algorithm with a nested cross-validation 
-on the 90% open MODA GS. They are then encouraged to share with the MODA team 
-the list of spindles detected on the test set, and a true accuracy measure will be returned, 
-which should then be reported in publications.
+Following machine learning best practices we suggest that developers should train, 
+validate and test their algorithm with a nested cross-validation on the open MODA GS.
+The whole dataset is available, developpers should keep a separate data set for testing.
 
 ### Short summary of what is the code for
 The spindle event locations file (that includes all the spindles scored by 
@@ -59,31 +56,39 @@ with their definition setting scripts :
 an input, output and a library folder.
 
 * Input folder "input" includes
-	1. 1_EpochViews_exp_re_90.txt : The list of epochs viewed by the experts and the researchers.
-	2. 2_EpochViews_ne_90.txt : The list of epochs viewed by the non-experts.
-	3. 3_EventLocations_exp_re_90.txt : The list of events scored by the experts and the researchers.
-	4. 4_EventLocations_ne_90.txt: The list of events scored by the experts and the non-experts.
-	5. 5_userSubtypeAnonymLUT_exp_re_20190521.txt : The user subtype (experts or researchers) of each annotator.	
-	6. 6_segListSrcDataLoc_p1.txt : The 405 extracted 115 s blocks from the 100 edf files for the phase 1.
-		6_segListSrcDataLoc_p1_90.txt : 361 extracted 115 s blocks from 90 edf files for the phase 1 (training/validation).
-		6_segListSrcDataLoc_p1_10.txt : 44 extracted 115 s blocks from 10 edf files for the phase 1 (testing).
+	1. 1_EpochViews_exp_re.txt : The list of epochs viewed by the experts and the researchers.
+	2. 2_EpochViews_ne.txt : The list of epochs viewed by the non-experts.
+	3. 3_EventLocations_exp_re.txt : The list of events scored by the experts and the researchers.
+	4. 4_EventLocations_ne.txt: The list of events scored by the experts and the non-experts.
+	5. 5_userSubtypeAnonymLUT_exp_re.txt : The user subtype (experts or researchers) of each annotator.	
+	6. 6_segListSrcDataLoc_p1.txt : The 404 extracted 115 s blocks from the 100 edf files for the phase 1.
+	  * warning : a block has not been presented to the scorers
+	  * 	then the subject MODA_01-02-13 has only 2 blocks
+	  * 	the epoch num 1956 to 1960 have been removed from 
+	  * 	the file 6_segListSrcDataLoc_p1.txt
+	  * 	Real total number of block is 404
 	7. 7_segListSrcDataLoc_p2.txt : The 345 extracted 115 s blocks from the 80 edf files for the phase 2.
-		7_segListSrcDataLoc_p2_90.txt : 314 extracted 115 s blocks from 72 edf files for the phase 2 (training/validation).
-		7_segListSrcDataLoc_p2_10.txt : 31 extracted 115 s blocks from 8 edf files for the phase 2 (testing).
-  
+ 
   -> For more information read the #README.txt in the input folder.
 
-* Output folder "output" includes the MODA GC for the training/validation dataset
+* Output folder "output" includes the MODA GC for the whole dataset
+	There are 3 folders, one for each user subtype: "exp" for experts, "re" for researchers and "ne" for non-experts.
+	Each folder includes:
 	1. scoreAvg_user_px.mat : 
         the average score vector across scorers (ex. scoreAvg_exp_p1.mat),
-        the GC threshold is not applied.
+        the GC threshold is not applied, packed in a tall vector.
 	2. GCVect_user_px.mat : 
         the GC vector (ex. GCVect_exp_p1.mat), the GC threshold is applied, 
-        then it includes only 0 and 1 (0 means no spindle, 1 means spindle).
+        then it includes only 0 and 1 (0 means no spindle, 1 means spindle), 
+	packed in a tall vector.
 	3. GC_spindlesLst_user_px.txt : 
-        the GC spindles list where each row is a spindle event with its start and duration.
-		(ex. GC_spindlesLst_exp_p1.txt).
-	4. !!! EEGVect_px.mat may soon be available, for now it has to be generated from the EDF/XML files !!! : 
+        the GC spindles list on the tall EEG vector where each row is a spindle event with its start and duration.
+	(ex. GC_spindlesLst_4EEGVect_exp_p1.txt).
+	4. GC_spindlesLst_4PSG_user_px.txt :
+	the GC spindles list from each PSG source file where each row is a spindle event with its start and duration.
+	5. GC_blockViewedLst_4PSG_user_px.txt :
+	the blocks scored from each PSG source file where each row is an eeg block scored with its start and duration.
+	6. !!! EEGVect_px.mat may soon be available, for now it has to be generated from the EDF/XML files !!! : 
         the EEG time series vector (ex. EEGVect_p1.mat) of the extracted 
         115 s blocks concatenated in one tall vector.
   
@@ -102,21 +107,39 @@ an input, output and a library folder.
     could be modified in order to create your own set of GC spindles.
 * Run "MODA01_GC_DEF.m" script in matlab.
 * Go to the ./MODA01_pack/currentDate_Time_user.m/output/ to view the results.
-or
+* You can also use the outputs files already saved in the output folder.
+OR
+* Go to http://www.ceams-carsm.ca/mass and request the dataset for MODA.  
+Access to these files requires that the investigators submit a copy of their project 
+(as approved by their local ethics board) and a proof of ethical approval. 
+Upon reception of these documents, the MASS team will provide to the requesting 
+investigators the whole set of PSG files for the MODA Gold Standard.
+* Copy the 180 edf and XML files into the input folder.
 * Open "MODA02_EEG_DEF.m" and modify the settings available to match your configuration.  
 * Run "MODA02_EEG_DEF.m" script in matlab.
 * Go to the ./MODA02_pack/currentDate_Time_user.m/output/ to view the results.
 
-You can also use the outputs files already saved in the output folder.
 
+## What to expect from the MASS team
+
+You should get from the MASS team a folder called "MODA_EDFXML".
+The folder includes
+-#README.txt : description of the MODA_EDFXML 
+-MODA_EDF folder : includes the 180 edf (PSG) files (biosignal for each subject)
+-MODA_XML folder : includes the 180 xml files (sleep stages and GS spindles as event for each subject)
+Read the #README.txt in the "MODA_EDFXML" folder for more details.
 
 
 ## Interpreting the Results
 
-The GC spindle events list is found in ./output/GC_spindlesLst_user_px.txt, 
-where each row is a spindle event. Note that the spindle events are based 
+The GC spindle events list is found in ./output/exp/GC_spindlesLst_4EEGVect_user_px.txt, 
+where each row is a spindle event. Note that these spindle events are based 
 on the GC vector (all the 115 s blocks concatenated in one tall vector, 
 a NaN separates each block).  A startSamples=1 means the first sample of the GC vector.
+Or
+The GC spindle events list is found in ./output/exp/GC_spindlesLst_4PSG_user_px.txt, 
+where each row is a spindle event.  Note that these spindle events are listed 
+with their start and duration for each PSG file.
 
 
 
@@ -145,11 +168,11 @@ When using this code or modifications of this code, please cite:
         Lacourse, K., Yetton, B., Mednick, S. & Warby, S. C. 
         Massive Online Data Annotation (MODA): crowdsourcing to generate 
         high quality sleep spindle annotations from EEG data.
-	(Not submitted yet)
+	(under review)
 
 ### Change log:
 
 version 1.0 : First release, only the train/validation GS MODA dataset is available (90% of whole dataset) 
-	
+version 2.0 : Second release, the whole dataset is available. The GS spindle list referenced to the PSG file of each subject has been added.
 
 

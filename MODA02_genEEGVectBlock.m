@@ -80,7 +80,7 @@ for iphase = 1 : NPHASES
         end    
 
         % Load the data for the whole night
-        % LOAD EDF-XML, extract the data, filter and re-sampled
+        % LOAD EDF-XML, extract the data, filter and re-sampled to FS (100 Hz)
         primChanData = EDFLoadResampleFilterNoVerbose(pathEDFFileTmp,...
             EDFfilename, pathXMLFileTmp, XMLfilename, FS, PRIMCHAN);
 

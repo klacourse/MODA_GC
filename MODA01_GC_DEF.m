@@ -2,12 +2,12 @@
 %
 % Inputs: (all saved in the ./input folder)
 %   For experts (exp) and researchers (re)
-%   - EventLocationsAnonym_exp_re_20190521.txt
-%   - EpochViewsAnonym_exp_re_20190521.txt
-%   - userSubtypeAnonymLUT_exp_re_20190521.txt
+%   - 3_EventLocations_exp_re.txt
+%   - 2_EpochViews_exp_re.txt
+%   - 5_userSubtypeAnonymLUT_exp_re.txt
 %   For non-experts (ne)
-%   - EventLocations_ne_20160713.txt
-%   - EpochViews_ne_20160706.txt
+%   - 4_EventLocations_ne.txt
+%   - 2_EpochViews_ne.txt
 %
 % Outputs: 
 %   An output folder "MODA01_pack" is created after the run of this script to avoid overwrite. 
@@ -35,7 +35,7 @@ clear variables
 %   Running non-expert (ne) is longer and can be optimized by using parallel
 %   toolbox if available. To use parallel uncomment the parfor and comment
 %   the for loop in scoreEpochViewed.m and scoreSpindles.m.
-userSubtype = 'ne';
+userSubtype = 'exp';
 
 % Where the whole package analysis will be saved
     % the folder "MODA01_pack" is created 
