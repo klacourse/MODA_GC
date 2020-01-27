@@ -85,8 +85,8 @@ function scoreEpochViewed(epochViewsFileName, phaseLabel, usersIDSel,...
     nTotSamples = nSampleInEpoch * nEpochsTot;
     
     % Mark no spindle every epochs not seen by the annotator
-    parfor iExp = 1:nAnnot
-%     for iExp = 1:nAnnot
+%     parfor iExp = 1:nAnnot
+    for iExp = 1:nAnnot
         annotatorName = AnnotatorList{iExp};
         fileName2Save = sprintf('%s/%s/%s-ScoredVectorByAnnot.mat', ...
             pathOutput, annotScoreFolderName, annotatorName);

@@ -150,8 +150,8 @@ function scoreSpindles(eventsLocFileName, phaseLabel, startEpochNum,...
     
     % Phase and userSubTypeLabel are selected
     % For each selected annotator 
-    parfor iExp = 1:nAnnot
-%     for iExp = 1:nAnnot
+%     parfor iExp = 1:nAnnot
+    for iExp = 1:nAnnot
         annotatorName   = FileNameList{iExp};
         annotatorName   = annotatorName(1:regexp(annotatorName,'-')-1);
         expertTab       = strcmp(annotatorPhase,annotatorName);
