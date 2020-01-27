@@ -1,42 +1,44 @@
 
-* Release Version 1.0
+* Release Version 2.0
 
-The scoring files modified to keep only 90% of the total number of subjects for training/validation.
+The scoring files of the whole dataset.
 
-Total number of subjects for the whole database:
+Total number of subjects and blocks of 115 sec for the whole database:
 	phase 1 : 100 subjects
 	  -85 subjects with 3 blocks 
 	  -15 subjects with 10 blocks
 	  -Total of 405 blocks
+	  * warning : a block has not been presented to the scorers
+	  * 	then the subject MODA_01-02-13 has only 2 blocks
+	  * 	the epoch num 1956 to 1960 have been removed from 
+	  * 	the file 6_segListSrcDataLoc_p1.txt
+	  * 	Real total number of block is 404
 	phase 2 : 80 subjects
 	  -65 subjects with 3 blocks
 	  -15 subjects with 10 blocks
 	  -Total of 345 blocks
 	For a total of 750 blocks
 
-The training/validation set includes:
-	phase 1 : 13 subjects/10 blocks + 77 subjects/3 blocks = 361 blocks
-	phase 2 : 14 subject/10 blocks + 58 subjects/3 blocks = 314 blocks
-
 ---------------------------------------------------------
 The MODA web interface output files
 ---------------------------------------------------------
-
-1_EpochViews_exp_re_90.txt : The list of epochs viewed by the experts and the researchers.
-2_EpochViews_ne_90.txt : The list of epochs viewed by the non-experts.
-3_EventLocations_exp_re_90.txt : The list of events scored by the experts and the researchers.
-4_EventLocations_ne_90.txt : The list of events scored by the experts and the non-experts.
-5_userSubtypeAnonymLUT_exp_re_20190521.txt : The user subtype (experts or researchers) of each annotator.
+1_EpochViews_exp_re.txt : The list of epochs viewed by the experts and the researchers.
+(The same epoch is viewed many times, but not by the same scorer.)
+2_EpochViews_ne.txt : The list of epochs viewed by the non-experts.
+3_EventLocations_exp_re.txt : The list of events scored by the experts and the researchers.
+4_EventLocations_ne.txt : The list of events scored by the experts and the non-experts.
+5_userSubtypeAnonymLUT_exp_re.txt : The user subtype (experts or researchers) of each annotator.
 
 ---------------------------------------------------------
 The lists of the extracted 115 s block.
 ---------------------------------------------------------
-6_segListSrcDataLoc_p1.txt : The 405 extracted 115 s blocks from the 100 edf files for the phase 1.
+-> !!! the eeg signal here is downsampled to 100 Hz !!!
+6_segListSrcDataLoc_p1.txt : The 404 extracted 115 s blocks from the 100 edf files for the phase 1.
+* warning : a block has not been presented to the scorers
+* 	then the subject MODA_01-02-13 has only 2 blocks
+* 	the epoch num 1956 to 1960 have been removed from the file 6_segListSrcDataLoc_p1.txt
+* 	Real total number of block is 404 but the index goes from 1 to 405.
 7_segListSrcDataLoc_p2.txt : The 345 extracted 115 s blocks from the 80 edf files for the phase 2.
-6_segListSrcDataLoc_p1_90.txt : 361 extracted 115 s blocks from 90 edf files for the phase 1.
-7_segListSrcDataLoc_p2_90.txt : 314 extracted 115 s blocks from 72 edf files for the phase 2.
-6_segListSrcDataLoc_p1_10.txt : 44 extracted 115 s blocks from 10 edf files for the phase 1.
-7_segListSrcDataLoc_p2_10.txt : 31 extracted 115 s blocks from 8 edf files for the phase 2.
 
 
 All tab separated text file.
@@ -49,5 +51,5 @@ The MODA EDF/XML are needed to run the MODA02_EEG_DEF.m script.
 ### Change log: ###
 
 version 1.0 : First release, only the training/validation GC MODA dataset is available (90% of whole dataset)
-
+version 2.0 : Second release, the whole GC MODA dataset is available
 
