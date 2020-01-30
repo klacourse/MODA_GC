@@ -108,6 +108,7 @@ an input, output and a library folder.
 * Run "MODA01_GC_DEF.m" script in matlab.
 * Go to the ./MODA01_pack/currentDate_Time_user.m/output/ to view the results.
 * You can also use the outputs files already saved in the output folder.
+
 OR
 * Go to http://www.ceams-carsm.ca/mass and request the dataset for MODA.  
 Access to these files requires that the investigators submit a copy of their project 
@@ -123,11 +124,13 @@ investigators the whole set of PSG files for the MODA Gold Standard.
 ## What to expect from the MASS team
 
 You should get from the MASS team a folder called "MODA_EDFXML".
+
 The folder includes
--#README.txt : description of the MODA_EDFXML 
--MODA_EDF folder : includes the 180 edf (PSG) files (biosignal for each subject)
--MODA_XML folder : includes the 180 xml files (sleep stages and GS spindles as event for each subject)
-Read the #README.txt in the "MODA_EDFXML" folder for more details.
+* #README.txt : description of the MODA_EDFXML folder
+* MODA_EDF folder : includes the 180 edf (PSG) files (biosignal for each subject)
+* MODA_XML folder : includes the 180 xml files (sleep stages and GS spindles as event for each subject)
+
+-> Read the #README.txt in the "MODA_EDFXML" folder for more details.
 
 
 ## Interpreting the Results
@@ -136,7 +139,9 @@ The GC spindle events list is found in ./output/exp/GC_spindlesLst_4EEGVect_user
 where each row is a spindle event. Note that these spindle events are based 
 on the GC vector (all the 115 s blocks concatenated in one tall vector, 
 a NaN separates each block).  A startSamples=1 means the first sample of the GC vector.
-Or
+
+OR
+
 The GC spindle events list is found in ./output/exp/GC_spindlesLst_4PSG_user_px.txt, 
 where each row is a spindle event.  Note that these spindle events are listed 
 with their start and duration for each PSG file.
