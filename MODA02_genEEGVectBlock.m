@@ -3,6 +3,12 @@
 % (phase 1 and phase 2) of MODA.
 % A NaN is added between each 115 s block.
 % 
+%   * warning : a block has not been presented to the scorers
+%   * 	then the subject MODA_01-02-13 has only 2 blocks
+%   * 	the epoch num 1956 to 1960 have been removed from 
+%   * 	the file 6_segListSrcDataLoc_p1.txt
+%   * 	Real total number of block is 404
+%
 % Author: Karine Lacourse 2019-09-26
 %   Changes log:
 %   
@@ -14,6 +20,8 @@ FS              = 100; % Frequency Sampling to reduce the processing time
 PRIMCHAN        = {'C3-A2','C3-LE'};
 BLOCKDURSEC     = 115; % 22.5 sec *4 + 25 sec
 NPHASES         = 2; % Number of phases in the MODA project
+NSEGMENTS       = {405,345};
+NEPOCHSINBLOCK  = 5; % Number of epochs in one block
 
 % Path of the input files : list of the block extracted from the EEG file
 inputPathPackageDir{1} = [genInputPackage,'6_segListSrcDataLoc_p1.txt'];% Phase 1
@@ -44,11 +52,11 @@ epochStartSampleCol = 5;
 EEGvectorFileName = 'EEGVect'; % The filename of the output file
 pathXMLFileTmp = pathXMLFile{1};
 pathEDFFileTmp = pathEDFFile{1};
-% parfor iphase = 1 : NPHASES
-for iphase = 1 : NPHASES
+% parfor iPhase = 1 : NPHASES
+for iPhase = 1 : NPHASES
 
     % Read the epochListSrcDataLoc
-    dataSrcEEG              = readtext(inputPathPackageDir{iphase},'[,\t]');
+    dataSrcEEG              = readtext(inputPathPackageDir{iPhase},'[,\t]');
     epochNumData            = cell2mat(dataSrcEEG(2:end,epochNumCol));
     subjectIDData           = dataSrcEEG(2:end,subjectIDCol);
     blockNumExpData         = cell2mat(dataSrcEEG(2:end,blockNumExpCol));
@@ -56,20 +64,20 @@ for iphase = 1 : NPHASES
    
     subjectIDUniq           = unique(subjectIDData);
     nSubjects               = length(subjectIDUniq);
-    nSegments               = length(epochNumData);
 
-    fprintf('phase#%i: %i subjects\n', iphase, nSubjects);
+    fprintf('phase#%i: %i subjects\n', iPhase, nSubjects);
 
     % Add a NaN (+1) between each epoch
     nSampleInSeg  = BLOCKDURSEC * FS + 1;
-    EEGvector       = nan(nSegments * nSampleInSeg,1);
-    filenameVector  = cell(nSegments,1);
+    EEGvector       = nan(NSEGMENTS{iPhase} * nSampleInSeg,1);
+    filenameVector  = cell(NSEGMENTS{iPhase},1);
 
     for iSjt = 1: nSubjects
 
         % find the epoch 
-        iSjtEpochLst = find(strcmp(subjectIDUniq{iSjt},subjectIDData)==1);
-
+        iSjtSegIncLst = find(strcmp(subjectIDUniq{iSjt},subjectIDData)==1);
+        iSjtEpochLst = epochNumData(iSjtSegIncLst);
+        
         % set the EDF/XML to load
         EDFfilename = sprintf('MODA_%s.edf',subjectIDUniq{iSjt});
         XMLfilename = sprintf('MODA_%s.edf.XML',subjectIDUniq{iSjt});    
@@ -87,20 +95,22 @@ for iphase = 1 : NPHASES
         % Store each epoch in the EEG vector
         for iSjtEpoch = 1 : length(iSjtEpochLst)
             iEpoch = iSjtEpochLst(iSjtEpoch);
-            epochStartSample = epochStartSampleData(iEpoch);
+            iSegInc = iSjtSegIncLst(iSjtEpoch);
+            epochStartSample = epochStartSampleData(iSegInc);
             data2plot = primChanData(epochStartSample+1: epochStartSample+nSampleInSeg-1);        
             % We step the NaN between each epoch
-            EEGvector( (iEpoch-1)*nSampleInSeg +1: iEpoch*nSampleInSeg-1, 1 ) = ...
+            iSegReal = floor((iEpoch-1)/NEPOCHSINBLOCK)+1;
+            EEGvector( (iSegReal-1)*nSampleInSeg +1: iSegReal*nSampleInSeg-1, 1 ) = ...
                 data2plot;
             filenameVector{iEpoch} = sprintf('e%i-b%i-%s-smp%i.png', iEpoch, ...
-            blockNumExpData(iEpoch), subjectIDData{iEpoch}, epochStartSampleData(iEpoch));         
+            blockNumExpData(iSegInc), subjectIDData{iSegInc}, epochStartSampleData(iSegInc));         
         end
 
         fprintf('%s written in the EEG vector\n', subjectIDUniq{iSjt});
     end
 
     % Save the tall eeg vector, a function is needed for the parallel use.
-    saveEEGVector( pathOutput, iphase, EEGvector, EEGvectorFileName );
+    saveEEGVector( pathOutput, iPhase, EEGvector, EEGvectorFileName );
     
     % Add all the code used in the code directory of the analysis package
     codeInputDirectory = pwd;

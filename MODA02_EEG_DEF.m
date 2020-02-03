@@ -34,8 +34,8 @@ genInputPackage = './input/';
 % These files must be requested to the MASS team
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 % Folder of the EDF and XML files to read
-pathEDFFile = {'/media/dossierCommun/MASS/MODA_EDFXML/EDF/'};
-pathXMLFile = {'/media/dossierCommun/MASS/MODA_EDFXML/XML/'};
+pathEDFFile = {'./input/MODA_EDFXML/EDF/'};
+pathXMLFile = {'./input/MODA_EDFXML/XML/'};
             
 % Run the main script
 MODA02_genEEGVectBlock
