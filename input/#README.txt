@@ -1,5 +1,5 @@
 
-* Release Version 2.0
+* Release Version 3.0
 
 The scoring files of the whole dataset.
 
@@ -32,7 +32,6 @@ The MODA web interface output files
 ---------------------------------------------------------
 The lists of the extracted 115 s block.
 ---------------------------------------------------------
--> !!! the eeg signal here is downsampled to 100 Hz !!!
 6_segListSrcDataLoc_p1.txt : The 404 extracted 115 s blocks from the 100 edf files for the phase 1.
 * warning : a block has not been presented to the scorers
 * 	then the subject MODA_01-02-13 has only 2 blocks
@@ -40,16 +39,20 @@ The lists of the extracted 115 s block.
 * 	Real total number of block is 404 but the index goes from 1 to 405.
 7_segListSrcDataLoc_p2.txt : The 345 extracted 115 s blocks from the 80 edf files for the phase 2.
 
+---------------------------------------------------------
+The eeg channel used to score spindles
+---------------------------------------------------------
+8_MODA_primChan_180sjt.txt : The channel (C3-A2 or C3-LE) used for each of the 180 edf files.
+Since clinical montage uses typically C3-A2, the C3 eeg signal from the PSG file was reformated to A2 when available.
 
 All tab separated text file.
-
-!!! Warnings !!!
-The EDF/XML files for MODA and provided my the MASS team could be added in this input folder.
-The MODA EDF/XML are needed to run the MODA02_EEG_DEF.m script.
 
 
 ### Change log: ###
 
-version 1.0 : First release, only the training/validation GC MODA dataset is available (90% of whole dataset)
-version 2.0 : Second release, the whole GC MODA dataset is available
+version 1.0 : First release, only the train/validation GS MODA dataset is available (90% of whole dataset) 
+
+version 2.0 : Second release, the whole dataset is available. The GS spindle list referenced to the PSG file of each subject has been added.
+
+version 3.0 : MODA GS annotations are aligned with the PSG MASS data V2.0 (ss1-ss5) subsets provided by the MASS team (http://www.ceams-carsm.ca/mass).
 

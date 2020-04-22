@@ -1,4 +1,4 @@
-﻿* Release Version 2.0
+﻿* Release Version 3.0
 
 ---------------------------------------------------------
 OUTPUT of MODA01 : the generation of the Group Consensus
@@ -37,8 +37,7 @@ these folders include only the phase 1).
 
 3. The GC spindles list where each row is a spindle event with its start 
     and duration (tab separated text file).
-
-    *** Events referenced to the tall EEG vector ***
+        Events referenced to the tall EEG vector.
 	Filename : GC_spindlesLst_4EEGVect_exp_p1.txt and GC_spindlesLst_4EEGVect_exp_p2.txt
 	The frequency sampling rate is 100 Hz.
 	The row header of the file is: "eventNum, startSamples, durationSamples,
@@ -52,45 +51,24 @@ these folders include only the phase 1).
 	Where the startSec is the start index of the spindle mesured in second.
 	Where the durationSec is the length of the spindle mesured in second.
 
-    *** Events referenced to the PSG source file of each subject ***
-	Filename : GC_spindlesLst_4PSG_exp_p1.txt and GC_spindlesLst_4PSG_exp_p2.txt.
-	The frequency sampling rate is 256 Hz.
-	The row header of the file is: "'eventNum','blockNum', 'PSGFilename', 
-        'startSamples', 'durationSamples','startSec', 'durationSec'"
-	Where the eventNum is the incremental event number,
-        based on the location in the GC vector.
-    	Where the blockNum is the incremental index of block (phase#1: 1-404; phase#2: 1-345)
-    	Where the PSGFilename is the source PSG file name of the event 
-	(without the prefix MODA_)
-	Where the startSamples is the start index of the spindle mesured with 
-        the number of samples (1 means the first sample of the PSG file).
-	Where the durationSamples is the length of the spindle mesured with 
-        the number of samples (256 means a duration of one second).
-	Where the startSec is the start index of the spindle mesured in second.
-	Where the durationSec is the length of the spindle mesured in second.
+4. The annotation files (.txt) with the GC spindle events for each subject used (tab separated text file).
+	Annotation files include events called "segmentViewed" and "spindle".  
+	Only the "segmentViewed" were scored for spindles, 10 or 3 segments were scored per PSG file.
+	Filename : file name is consistent with the MASS data set (ex 01-01-0001_MODA_GS.txt).
+	The row header of the file is: "'startSec','durationSec','eventName'"
+	Where the startSec is the start index of the event mesured in second.
+	Where the durationSec is the length of the event mesured in second.
+	Where the eventName is "segmentViewed" or "spindle".
 
-    *** Blocks scored referenced to the PSG source file of each subject ***
-	The unseen block is not considered here, there are only 404 blocks.
-	Filename : GC_blockViewedLst_4PSG_exp_p1.txt and GC_blockViewedLst_4PSG_exp_p2.txt.
-	The frequency sampling rate is 256 Hz.
-	The row header of the file is: "'blockNum','PSGFilename', 
-        'startSamples', 'durationSamples','startSec', 'durationSec'"	
-	Where the blockNum is the incremental index of block (phase#1: 1-404; phase#2: 1-345)
-    	Where the PSGFilename is the source PSG file name of the block scored
-	(without the prefix MODA_)
-	Where the startSamples is the start index of the block scored mesured with 
-        the number of samples (1 means the first sample of the PSG file).
-	Where the durationSamples is the length of the block scored mesured with 
-        the number of samples (256 means a duration of one second).
-	Where the startSec is the start index of the block scored mesured in second.
-	Where the durationSec is the length of the block scored mesured in second.	
 
 ---------------------------------------------------------
 OUTPUT of MODA02 : the generation of the EEG time series vector
 ---------------------------------------------------------
+ The output is not saved because the MASS PSG files are subject to licencing as described on the MASS website
+ (http://www.ceams-carsm.ca/mass).
 
-!!! Removed for now since we have to make sure it respects the MASS ethics contract !!!
-4.  The EEG time series vector : 
+ What output to expect : 
+ The EEG time series vector : 
 	Filename : EEGVect_p1.mat, EEGVect_p2.mat (One file per phase.)
 	The frequency sampling rate is 100 Hz.  
 	The EEG values are expressed in µV.
@@ -100,9 +78,14 @@ OUTPUT of MODA02 : the generation of the EEG time series vector
 	phase#2 : 345 blocks of 115 sec sampled at 100 Hz with a NaN between each block (3967845 samples)
 
 
-### Change log: ###	
-version 1.0 : First release, only the training/validation GC MODA dataset is available (90% of whole dataset)
-version 2.0 : Second release, the whole GC MODA dataset is available and the GC spindle list referenced to the PSG file of each subject has been added.
+
+### Change log: ###
+
+version 1.0 : First release, only the train/validation GS MODA dataset is available (90% of whole dataset) 
+
+version 2.0 : Second release, the whole dataset is available. The GS spindle list referenced to the PSG file of each subject has been added.
+
+version 3.0 : MODA GS annotations are aligned with the PSG MASS data V2.0 (ss1-ss5) subsets provided by the MASS team (http://www.ceams-carsm.ca/mass).
 						
 
 

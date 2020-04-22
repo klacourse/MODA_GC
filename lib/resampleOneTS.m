@@ -57,7 +57,8 @@ function [TS, modFlag] = resampleOneTS(sampleRate, TS, resamplingFrequency, LowP
                     [TS, ~] = butterFiltZPLowPass(TS, minNyquist, sampleRate);
                 end
 
-                TS = resample(TS, resamplingFrequency, sampleRate); 
+                TS = resample(TS, 1/sampleRate:1/sampleRate:length(TS)/sampleRate,...
+                    resamplingFrequency); 
                 modFlag = 1;
             end
         end

@@ -1,12 +1,16 @@
 ﻿# README
 
-* Release Version 2.0
+* Release Version 3.0
 
 
 # What is this code for?
 
 This package is for the MODA (Massive Online Data Annotation) Groups Consensus (GC) set of spindles.
 For more details, and to leave comments or questions for the project, see MODA on Open Science Framework at https://osf.io/8bma7/
+
+The PSG files used in this project are provided by the MASS team.
+See http://www.ceams-carsm.ca/mass and the section lower "To download the PSG files used to score spindles." for more information.
+
 
 ### Short summary of the MODA project 
 Sleep EEG time series from 180 subjects were presented as “phase#1-100 younger subjects” 
@@ -19,6 +23,7 @@ in a tall vector (with a NaN separating each 115 s block). Therefore,
 the scores of the annotators can be analyzed in a tall vector (one for each phase)
  instead of 750 vectors (one for each 115 s block extracted).
 
+
 ### Short summary of what is a Groups Consensus (GC) set of spindles
 Scorers rated their confidence (low, med, high) for each spindle marked. 
 Specifically, each sample of the EEG time series had a score weighted by 
@@ -28,10 +33,12 @@ Then, sample by sample, the scores are averaged across scorers,
 and if they exceed the chosen Group Consensus Threshold (GCt) then 
 these samples were identified to be part of the GC spindle dataset.
 
+
 ### Data available to download
 Following machine learning best practices we suggest that developers should train, 
 validate and test their algorithm with a nested cross-validation on the open MODA GS.
 The whole dataset is available, developpers should keep a separate data set for testing.
+
 
 ### Short summary of what is the code for
 The spindle event locations file (that includes all the spindles scored by 
@@ -39,13 +46,14 @@ all the annotators) is read and the GC set of spindles is generated.  The GC is 
 for each user subtype "experts (exp), researchers (re), Non-experts (ne)" 
 and phase (if available). 
 Main outputs generated :
-    -a tall (.mat) vector of the score averaged across scorers
+    -Annotation files (.txt) with the GC spindle events for each subject used
+    -a tall (.mat) vector of the score averaged across scorers (concatenation of the 750 blocks scored)
     -a tall (.mat) vector of the GC spindle events (1 means spindle and 0 means no spindle)
     -a text file (.txt) of the list of the GC spindle events (start index and duration)
-    -a tall (.mat) vector of the EEG time series scored (extracted blocks concatenated)
 
 The package has been developed on Linux 16.04 with MATLAB R2018b 
 (no toolbox is needed unless you want to run in parallel).
+
 
 ## What will I find in this code package?
 
@@ -61,13 +69,14 @@ an input, output and a library folder.
 	3. 3_EventLocations_exp_re.txt : The list of events scored by the experts and the researchers.
 	4. 4_EventLocations_ne.txt: The list of events scored by the experts and the non-experts.
 	5. 5_userSubtypeAnonymLUT_exp_re.txt : The user subtype (experts or researchers) of each annotator.	
-	6. 6_segListSrcDataLoc_p1.txt : The 404 extracted 115 s blocks from the 100 edf files for the phase 1.
+	6. 6_segListSrcDataLoc_p1.txt : The 404 extracted 115 s blocks from the 100 edf MASS files for the phase 1.
 	  * warning : a block has not been presented to the scorers
 	  * 	then the subject MODA_01-02-13 has only 2 blocks
 	  * 	the epoch num 1956 to 1960 have been removed from 
 	  * 	the file 6_segListSrcDataLoc_p1.txt
 	  * 	Real total number of block is 404
 	7. 7_segListSrcDataLoc_p2.txt : The 345 extracted 115 s blocks from the 80 edf files for the phase 2.
+	8. 8_MODA_primChan_180sjt.txt : TThe channel used (C3-A2 or C3-LE) for each of the 180 edf files.
  
   -> For more information read the #README.txt in the input folder.
 
@@ -84,14 +93,11 @@ an input, output and a library folder.
 	3. GC_spindlesLst_user_px.txt : 
         the GC spindles list on the tall EEG vector where each row is a spindle event with its start and duration.
 	(ex. GC_spindlesLst_4EEGVect_exp_p1.txt).
-	4. GC_spindlesLst_4PSG_user_px.txt :
-	the GC spindles list from each PSG source file where each row is a spindle event with its start and duration.
-	5. GC_blockViewedLst_4PSG_user_px.txt :
-	the blocks scored from each PSG source file where each row is an eeg block scored with its start and duration.
-	6. !!! EEGVect_px.mat may soon be available, for now it has to be generated from the EDF/XML files !!! : 
-        the EEG time series vector (ex. EEGVect_p1.mat) of the extracted 
-        115 s blocks concatenated in one tall vector.
-  
+	4. Folder of the annotation files "annotFiles" :
+	an annotation file (.txt) for each PSG file with a name that is consistent with the MASS data set 
+	(ex 01-01-0001_MODA_GS.txt), it includes events called "segmentViewed" and "spindle".  
+	Only the "segmentViewed" were scored for spindles, 10 or 3 segments were scored per PSG file.
+
   -> For more information read the #README.txt in the output folder.
 						
 
@@ -104,33 +110,30 @@ an input, output and a library folder.
 
 * Open "MODA01_GC_DEF.m" and modify the settings available to match your configuration.  
 	Some variables (as the Group Consensus Threshold and the spindle length limit) 
-    could be modified in order to create your own set of GC spindles.
+    	could be modified in order to create your own set of GC spindles.
 * Run "MODA01_GC_DEF.m" script in matlab.
 * Go to the ./MODA01_pack/currentDate_Time_user.m/output/ to view the results.
 * You can also use the outputs files already saved in the output folder.
 
 OR
-* Go to http://www.ceams-carsm.ca/mass and request the dataset for MODA.  
-Access to these files requires that the investigators submit a copy of their project 
-(as approved by their local ethics board) and a proof of ethical approval. 
-Upon reception of these documents, the MASS team will provide to the requesting 
-investigators the whole set of PSG files for the MODA Gold Standard.
-* Copy the 180 edf and XML files into the input folder.
-* Open "MODA02_EEG_DEF.m" and modify the settings available to match your configuration.  
+
+* Open "MODA02_EEG_DEF.m" and modify the settings available to match your configuration.
+	Set the path to access the PSG edf files you received from MASS.
+	Look at the sections lower for more information.
 * Run "MODA02_EEG_DEF.m" script in matlab.
 * Go to the ./MODA02_pack/currentDate_Time_user.m/output/ to view the results.
 
 
-## What to expect from the MASS team
+## To download the PSG files used to score spindles.
 
-You should get from the MASS team a folder called "MODA_EDFXML".
+* Go to http://www.ceams-carsm.ca/mass and request the complete PSG MASS data V2.0 (SS1 to SS5) 
+put online April first 2020. Access to these PSG files requires that the investigators submit 
+a copy of their project (as approved by their local ethics board) and a proof of ethical approval. 
+Upon reception of these documents, the MASS team will provide to the requesting investigators 
+with the whole set of PSG files required for the MODA Gold Standard. 
+Access to the PSG files will be sent by email, one folder per subset (SS1-SS5), shared through OneDrive.  
+The whole data set of 200 subjects will be shared even if MODA uses only 180 PSG files.
 
-The folder includes
-* #README.txt : description of the MODA_EDFXML folder
-* MODA_EDF folder : includes the 180 edf (PSG) files (biosignal for each subject)
-* MODA_XML folder : includes the 180 xml files (sleep stages and GS spindles as event for each subject)
-
--> Read the #README.txt in the "MODA_EDFXML" folder for more details.
 
 
 ## Interpreting the Results
@@ -142,9 +145,8 @@ a NaN separates each block).  A startSamples=1 means the first sample of the GC 
 
 OR
 
-The GC spindle events list is found in ./output/exp/GC_spindlesLst_4PSG_user_px.txt, 
-where each row is a spindle event.  Note that these spindle events are listed 
-with their start and duration for each PSG file.
+Extract the "spindle" events within the "segmentViewed" events from the annotation files 
+found in ./output/exp/annotFiles/
 
 
 
@@ -175,9 +177,13 @@ When using this code or modifications of this code, please cite:
         high quality sleep spindle annotations from EEG data.
 	(under review)
 
+
 ### Change log:
 
 version 1.0 : First release, only the train/validation GS MODA dataset is available (90% of whole dataset) 
+
 version 2.0 : Second release, the whole dataset is available. The GS spindle list referenced to the PSG file of each subject has been added.
+
+version 3.0 : MODA GS annotations are aligned with the PSG MASS data V2.0 (ss1-ss5) subsets provided by the MASS team (http://www.ceams-carsm.ca/mass).
 
 

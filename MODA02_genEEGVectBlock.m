@@ -4,7 +4,7 @@
 % A NaN is added between each 115 s block.
 % 
 %   * warning : a block has not been presented to the scorers
-%   * 	then the subject MODA_01-02-13 has only 2 blocks
+%   * 	then the subject 01-02-13 has only 2 blocks
 %   * 	the epoch num 1956 to 1960 have been removed from 
 %   * 	the file 6_segListSrcDataLoc_p1.txt
 %   * 	Real total number of block is 404
@@ -16,8 +16,6 @@
 
 % INIT
 FS              = 100; % Frequency Sampling to reduce the processing time
-% All possible primary channels loaded from the EDF
-PRIMCHAN        = {'C3-A2','C3-LE'};
 BLOCKDURSEC     = 115; % 22.5 sec *4 + 25 sec
 NPHASES         = 2; % Number of phases in the MODA project
 NSEGMENTS       = {405,345};
@@ -26,6 +24,8 @@ NEPOCHSINBLOCK  = 5; % Number of epochs in one block
 % Path of the input files : list of the block extracted from the EEG file
 inputPathPackageDir{1} = [genInputPackage,'6_segListSrcDataLoc_p1.txt'];% Phase 1
 inputPathPackageDir{2} = [genInputPackage,'7_segListSrcDataLoc_p2.txt'];% Phase 2
+% The list of the eeg reference is used
+inputPathPackageDir{3} = [genInputPackage,'8_MODA_primChan_180sjt.txt'];
 
 % The name of the current script
 curScriptStruct     = dbstack();
@@ -47,10 +47,12 @@ pathOutput = DEF.pathOutput;
 epochNumCol         = 1;
 subjectIDCol        = 2;
 blockNumExpCol      = 4;
-epochStartSampleCol = 5;
+epochStartSecCol    = 5;
+
+% The list of eeg channel reference used
+[eegChanRef_data] = readtext(inputPathPackageDir{3},'[,\t]');
 
 EEGvectorFileName = 'EEGVect'; % The filename of the output file
-pathXMLFileTmp = pathXMLFile{1};
 pathEDFFileTmp = pathEDFFile{1};
 % parfor iPhase = 1 : NPHASES
 for iPhase = 1 : NPHASES
@@ -60,7 +62,7 @@ for iPhase = 1 : NPHASES
     epochNumData            = cell2mat(dataSrcEEG(2:end,epochNumCol));
     subjectIDData           = dataSrcEEG(2:end,subjectIDCol);
     blockNumExpData         = cell2mat(dataSrcEEG(2:end,blockNumExpCol));
-    epochStartSampleData    = cell2mat(dataSrcEEG(2:end,epochStartSampleCol));
+    epochStartSecData    = cell2mat(dataSrcEEG(2:end,epochStartSecCol));
    
     subjectIDUniq           = unique(subjectIDData);
     nSubjects               = length(subjectIDUniq);
@@ -78,32 +80,37 @@ for iPhase = 1 : NPHASES
         iSjtSegIncLst = find(strcmp(subjectIDUniq{iSjt},subjectIDData)==1);
         iSjtEpochLst = epochNumData(iSjtSegIncLst);
         
-        % set the EDF/XML to load
-        EDFfilename = sprintf('MODA_%s.edf',subjectIDUniq{iSjt});
-        XMLfilename = sprintf('MODA_%s.edf.XML',subjectIDUniq{iSjt});    
+        % set the EDF to load
+        EDFfilename = sprintf('%s PSG.edf',subjectIDUniq{iSjt});
         
         % Error check
         if isempty(iSjtEpochLst)
            warning('No epoch found for %s', subjectIDUniq{iSjt}); 
         end    
-
+        
+        % Find the channel label to know the reference
+        chanRef = eegChanRef_data(strcmp(eegChanRef_data(:,1),[subjectIDUniq{iSjt},'.edf']),2);
+        
         % Load the data for the whole night
-        % LOAD EDF-XML, extract the data, filter and re-sampled to FS (100 Hz)
-        primChanData = EDFLoadResampleFilterNoVerbose(pathEDFFileTmp,...
-            EDFfilename, pathXMLFileTmp, XMLfilename, FS, PRIMCHAN);
+        % LOAD EDF, extract the primary channel and ref channel if available, 
+        % filter and re-sampled to FS (100 Hz)
+        [primChanData, warningLst] = MASSEDFLoadResampleFilter(pathEDFFileTmp,...
+           EDFfilename, FS, chanRef{1});
+        
 
         % Store each epoch in the EEG vector
         for iSjtEpoch = 1 : length(iSjtEpochLst)
             iEpoch = iSjtEpochLst(iSjtEpoch);
             iSegInc = iSjtSegIncLst(iSjtEpoch);
-            epochStartSample = epochStartSampleData(iSegInc);
-            data2plot = primChanData(epochStartSample+1: epochStartSample+nSampleInSeg-1);        
+            epochStartSec = epochStartSecData(iSegInc);
+            % -1 to avoid ploting the nan 
+            data2plot = primChanData(round(epochStartSec*FS)+1: round(epochStartSec*FS)+nSampleInSeg-1);        
             % We step the NaN between each epoch
             iSegReal = floor((iEpoch-1)/NEPOCHSINBLOCK)+1;
             EEGvector( (iSegReal-1)*nSampleInSeg +1: iSegReal*nSampleInSeg-1, 1 ) = ...
                 data2plot;
-            filenameVector{iEpoch} = sprintf('e%i-b%i-%s-smp%i.png', iEpoch, ...
-            blockNumExpData(iSegInc), subjectIDData{iSegInc}, epochStartSampleData(iSegInc));         
+            filenameVector{iEpoch} = sprintf('e%i-b%i-%s-sec%i.png', iEpoch, ...
+            blockNumExpData(iSegInc), subjectIDData{iSegInc}, epochStartSecData(iSegInc));         
         end
 
         fprintf('%s written in the EEG vector\n', subjectIDUniq{iSjt});
@@ -120,6 +127,9 @@ end
 %--------------------------------------------------------------------------
 %% End of the package analysis
 %--------------------------------------------------------------------------
+% Write warnings
+cell2tab([DEF.pathWarning,'warning.txt'], warningLst, 'w');
+
 % If files are big, it is better to write its path
 FID = fopen([DEF.pathInput,'path.txt'],'w'); 
 for iF = 1 : length(inputPathPackageDir)
@@ -127,9 +137,6 @@ for iF = 1 : length(inputPathPackageDir)
 end
 for iF = 1 : length(pathEDFFile)
     fprintf(FID,'%s\n',pathEDFFile{iF});
-end
-for iF = 1 : length(pathXMLFile)
-    fprintf(FID,'%s\n',pathXMLFile{iF});
 end
 fclose(FID);
 

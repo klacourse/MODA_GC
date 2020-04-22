@@ -1,0 +1,17 @@
+startSec	durationSec	eventName	
+4614.7344	115	segmentViewed	
+8604.7852	115	segmentViewed	
+9344.793	115	segmentViewed	
+4686.2644	1	spindle	
+4699.3744	0.54	spindle	
+8608.6052	0.81	spindle	
+8625.7352	0.69	spindle	
+8629.7952	0.53	spindle	
+8642.5252	0.64	spindle	
+8708.9252	0.46	spindle	
+8717.8152	0.92	spindle	
+9368.163	1.18	spindle	
+9391.123	1.09	spindle	
+9402.803	0.67	spindle	
+9418.393	0.89	spindle	
+9443.383	0.62	spindle	

@@ -28,16 +28,24 @@ clear variables
     %       code, info, input, output, warning
 genPathPackage  = '';
 % Input of the current package
+% 6_segListSrcDataLoc_p1.txt, 7_segListSrcDataLoc_p2.txt 
+% and 8_MODA_primChan_180sjt.txt
 genInputPackage = './input/';
 
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 % These files must be requested to the MASS team
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-% Folder of the EDF and XML files to read
-pathEDFFile = {'./input/MODA_EDFXML/EDF/'};
-pathXMLFile = {'./input/MODA_EDFXML/XML/'};
+% Folder of the EDF files from MASS to read
+pathEDFFile = {'./input/MASS_PSG/'};
             
 % Run the main script
 MODA02_genEEGVectBlock
-            
-            
+
+% % To plot eegVector and GCvect
+% load('./output/exp/GCVect_exp_p1.mat');
+% load('./MODA02_pack/20200314_160930.m/output/EEGVect_p1.mat');
+% iseg=292; iepoch=1;
+% figure; subplot(2,1,1); 
+% plot(1/100:1/100:23,EEGvector((iseg-1)*11501+(iepoch-1)*2300+1:(iseg-1)*11501+iepoch*2300));
+% subplot(2,1,2); 
+% plot(1/100:1/100:23,GCVect((iseg-1)*11501+(iepoch-1)*2300+1:(iseg-1)*11501+iepoch*2300));
