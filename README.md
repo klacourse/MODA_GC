@@ -127,7 +127,7 @@ OR
 ## To download the PSG files used to score spindles.
 
 * Go to http://www.ceams-carsm.ca/mass and request the complete PSG MASS data V2.0 (SS1 to SS5) 
-put online April first 2020. Access to these PSG files requires that the investigators submit 
+put online in May 2020. Access to these PSG files requires that the investigators submit 
 a copy of their project (as approved by their local ethics board) and a proof of ethical approval. 
 Upon reception of these documents, the MASS team will provide to the requesting investigators 
 with the whole set of PSG files required for the MODA Gold Standard. 
